@@ -1,0 +1,2242 @@
+<style>
+  :root{
+    --pitch-green:#0B4C6E;
+    --field-green:#1573A6;
+    --field-green-light:#2196C9;
+    --cream:#F3EEE0;
+    --cream-dim:#E7DFC8;
+    --ball-red:#A8341F;
+    --ball-red-light:#C4472E;
+    --pitch-tan:#C9A876;
+    --ink:#16211A;
+    --white:#FFFFFF;
+    --led-off:#2196C9;
+  }
+  *{box-sizing:border-box;}
+  .app{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .app *{font-family:inherit;}
+  .app .display-font{
+    font-family:"Arial Black","Helvetica Neue",Arial,sans-serif;
+    letter-spacing:-0.02em;
+  }
+  .app .mono{
+    font-family:"SF Mono","Courier New",Courier,monospace;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+
+  /* Top nav */
+  .topbar{
+    background:var(--pitch-green);
+    color:var(--cream);
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    border-bottom:4px solid var(--pitch-tan);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--ball-red);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::before, .brand-mark::after{
+    content:"";
+    position:absolute;
+    width:26px;height:1px;
+    background:var(--cream);
+    opacity:0.85;
+  }
+  .brand-mark::before{transform:rotate(20deg);}
+  .brand-mark::after{transform:rotate(-20deg);}
+  .brand-name{
+    font-size:19px;
+    font-weight:900;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+  }
+  .brand-name span{color:var(--pitch-tan);}
+  .insta-link{
+    display:flex;
+    align-items:center;
+    margin-left:8px;
+    color:var(--cream-dim);
+    transition:color .15s;
+  }
+  .insta-link:hover{color:var(--pitch-tan);}
+
+  .boundary-celebration{
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    z-index:9999;
+  }
+  .boundary-celebration .txt{
+    font-family:"Arial Black","Helvetica Neue",Arial,sans-serif;
+    font-weight:900;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    font-size:64px;
+    text-shadow:0 4px 18px rgba(0,0,0,0.35);
+    animation:boundaryPop 1.05s ease-out forwards;
+  }
+  .boundary-celebration .txt.four{ color:var(--pitch-tan); }
+  .boundary-celebration .txt.six{ color:#5F8039; }
+  @keyframes boundaryPop{
+    0%   { transform:scale(0.3) rotate(-6deg); opacity:0; }
+    18%  { transform:scale(1.15) rotate(2deg); opacity:1; }
+    30%  { transform:scale(1) rotate(0deg); opacity:1; }
+    75%  { transform:scale(1) rotate(0deg); opacity:1; }
+    100% { transform:scale(1.3) rotate(0deg); opacity:0; }
+  }
+  .nav{
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .nav button{
+    background:transparent;
+    border:none;
+    color:var(--cream-dim);
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    border-radius:3px;
+    transition:background .15s, color .15s;
+  }
+  .nav button:hover{background:rgba(255,255,255,0.08); color:var(--white);}
+  .nav button.active{background:var(--pitch-tan); color:var(--pitch-green);}
+
+  .user-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .role-pill{
+    display:inline-block;
+    margin-top:2px;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .role-pill.admin{background:var(--ball-red); color:var(--white);}
+  .role-pill.user{background:var(--pitch-tan); color:var(--pitch-green);}
+
+  .auth-box{
+    background:var(--white);
+    border:1px solid #DDD5BC;
+    border-radius:8px;
+    padding:28px 26px;
+    width:100%;
+    max-width:360px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.06);
+  }
+
+  .main{
+    flex:1;
+    max-width:1080px;
+    width:100%;
+    margin:0 auto;
+    padding:24px 20px 60px;
+  }
+  .page-title{
+    font-size:26px;
+    font-weight:900;
+    margin:0 0 4px;
+    text-transform:uppercase;
+    letter-spacing:-0.01em;
+  }
+  .page-sub{
+    color:#5A6459;
+    font-size:14px;
+    margin:0 0 22px;
+  }
+
+  /* Cards */
+  .card{
+    background:var(--white);
+    border:1px solid #DDD5BC;
+    border-radius:6px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .card-title{
+    font-size:12px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--field-green);
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card-title::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:#E4DEC9;
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    border:none;
+    border-radius:4px;
+    padding:10px 18px;
+    font-size:13px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    transition:transform .1s, filter .15s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn:hover{filter:brightness(1.08);}
+  .btn-primary{background:var(--ball-red); color:var(--white);}
+  .btn-secondary{background:var(--field-green); color:var(--cream);}
+  .btn-outline{background:transparent; color:var(--field-green); border:1.5px solid var(--field-green);}
+  .btn-tan{background:var(--pitch-tan); color:var(--pitch-green);}
+  .btn-sm{padding:6px 12px; font-size:11px;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn-block{width:100%;}
+
+  /* Forms */
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:#5A6459;
+    margin-bottom:5px;
+  }
+  .field input, .field select{
+    width:100%;
+    padding:9px 10px;
+    border:1.5px solid #D8D0B8;
+    border-radius:4px;
+    font-size:14px;
+    background:var(--white);
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus{
+    outline:2px solid var(--pitch-tan);
+    outline-offset:1px;
+    border-color:var(--field-green);
+  }
+  .row{display:flex; gap:14px; flex-wrap:wrap;}
+  .row > *{flex:1; min-width:180px;}
+
+  /* Scoreboard (signature element) */
+  .scoreboard{
+    background:var(--pitch-green);
+    border-radius:8px;
+    padding:20px 22px;
+    color:var(--cream);
+    margin-bottom:16px;
+    box-shadow:inset 0 0 0 1px rgba(201,168,118,0.25);
+  }
+  .scoreboard-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .sb-team{
+    font-size:13px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--pitch-tan);
+    margin-bottom:6px;
+  }
+  .sb-score{
+    font-size:44px;
+    font-weight:900;
+    line-height:1;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .sb-score .wk{color:var(--ball-red-light);}
+  .sb-oversbox{
+    text-align:right;
+  }
+  .sb-oversbox .lbl{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--cream-dim); opacity:0.75;}
+  .sb-oversbox .val{font-size:22px; font-weight:800;}
+  .sb-crr{font-size:12px; color:var(--cream-dim); margin-top:4px;}
+  .watermark{
+    text-align:center;
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px dashed rgba(243,238,224,0.15);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:rgba(201,168,118,0.55);
+  }
+  .watermark.on-light{
+    border-top:1px dashed #E4DEC9;
+    color:#B9AE8D;
+  }
+  .sb-status{
+    margin-top:12px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--pitch-tan);
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .sb-watermark{
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px dashed rgba(243,238,224,0.15);
+    text-align:center;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:rgba(243,238,224,0.35);
+  }
+  .card-watermark{
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px dashed #E4DEC9;
+    text-align:center;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#B9AE8D;
+  }
+
+  .batting-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px dashed rgba(243,238,224,0.15);
+    font-size:14px;
+  }
+  .batting-row:last-child{border-bottom:none;}
+  .batting-row.striker{color:var(--pitch-tan); font-weight:800;}
+  .batting-row .stats{color:var(--cream-dim); font-size:12px;}
+
+  .bowler-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    font-size:14px;
+    font-weight:700;
+  }
+  .bowler-row .stats{color:var(--cream-dim); font-size:12px; font-weight:400;}
+
+  /* Ball log chips */
+  .over-log{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .ball-chip{
+    width:30px;height:30px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;
+    background:var(--field-green-light);
+    color:var(--cream);
+  }
+  .ball-chip.w{background:var(--ball-red);}
+  .ball-chip.b4{background:var(--pitch-tan); color:var(--pitch-green);}
+  .ball-chip.b6{background:#7A9C4C; color:var(--white);}
+
+  /* Scoring pad */
+  .pad-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .pad-btn{
+    padding:16px 6px;
+    border-radius:5px;
+    border:none;
+    font-size:17px;
+    font-weight:900;
+    cursor:pointer;
+    background:var(--field-green);
+    color:var(--cream);
+  }
+  .pad-btn:hover{filter:brightness(1.1);}
+  .pad-btn.four{background:var(--pitch-tan); color:var(--pitch-green);}
+  .pad-btn.six{background:#5F8039; color:var(--white);}
+  .extras-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .extras-grid button{
+    padding:10px 6px;
+    border-radius:5px;
+    border:1.5px solid var(--field-green);
+    background:transparent;
+    color:var(--field-green);
+    font-weight:800;
+    font-size:12px;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .extras-grid button:hover{background:rgba(32,69,45,0.08);}
+  .wicket-btn{
+    width:100%;
+    padding:12px;
+    border-radius:5px;
+    border:none;
+    background:var(--ball-red);
+    color:var(--white);
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    margin-bottom:10px;
+  }
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{
+    text-align:left;
+    padding:8px 10px;
+    background:var(--field-green);
+    color:var(--cream);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-weight:800;
+  }
+  th:first-child{border-radius:4px 0 0 0;}
+  th:last-child{border-radius:0 4px 0 0;}
+  td{padding:8px 10px; border-bottom:1px solid #EDE7D3;}
+  tr:nth-child(even) td{background:#FBF9F2;}
+  .rank-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:var(--pitch-tan);
+    color:var(--pitch-green);
+    font-weight:900;
+    font-size:11px;
+  }
+
+  .empty{
+    text-align:center;
+    padding:40px 20px;
+    color:#8A8F7E;
+  }
+  .empty .big{font-size:15px; font-weight:800; color:var(--ink); margin-bottom:6px;}
+
+  .match-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 16px;
+    border:1px solid #DDD5BC;
+    border-radius:6px;
+    margin-bottom:10px;
+    background:var(--white);
+    cursor:pointer;
+    transition:box-shadow .15s;
+  }
+  .match-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  .match-name{font-weight:800; font-size:14px;}
+  .match-meta{font-size:12px; color:#8A8F7E; margin-top:3px;}
+  .status-pill{
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .status-pill.live{background:var(--ball-red); color:var(--white);}
+  .status-pill.completed{background:#DDD5BC; color:var(--ink);}
+
+  .tag-input-help{font-size:11px; color:#8A8F7E; margin-top:4px;}
+
+  .tabs{display:flex; gap:6px; margin-bottom:18px; border-bottom:2px solid #E4DEC9;}
+  .tabs button{
+    background:none; border:none; padding:9px 4px; margin-right:14px;
+    font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.03em;
+    color:#8A8F7E; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px;
+  }
+  .tabs button.active{color:var(--field-green); border-bottom-color:var(--ball-red);}
+
+  .points-table th, .points-table td{text-align:center;}
+  .points-table td:first-child, .points-table th:first-child{text-align:left;}
+
+  .loading-msg{padding:40px; text-align:center; color:#8A8F7E;}
+  .inline-form{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-top:10px;}
+  .inline-form .field{margin-bottom:0; flex:1; min-width:160px;}
+  select{cursor:pointer;}
+  .hint{font-size:12px; color:#8A8F7E; margin-top:2px;}
+</style>
+
+<div id="root" class="app"><div class="loading-msg">Loading scoreboard…</div></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+  // --- Firebase setup (Realtime Database) -----------------------------------
+  // All shared cricket data (teams/matches/tournaments/playerTypes) and the
+  // account directory (users) live here, so every device — admin or viewer —
+  // reads and writes the same live data instead of per-browser storage.
+  const firebaseConfig = {
+    apiKey: "AIzaSyAwcdaAj-vjv8zAqsTVUI1gwdT--YslPnY",
+    authDomain: "ggpl-ypl-17.firebaseapp.com",
+    databaseURL: "https://ggpl-ypl-17-default-rtdb.firebaseio.com",
+    projectId: "ggpl-ypl-17",
+    storageBucket: "ggpl-ypl-17.firebasestorage.app",
+    messagingSenderId: "110865215422",
+    appId: "1:110865215422:web:a2162f2647634d728593ef"
+  };
+
+  let db;
+  try{
+    const firebaseApp = initializeApp(firebaseConfig);
+    db = getDatabase(firebaseApp);
+  }catch(e){
+    console.error('Firebase failed to initialize — the app cannot save or load data until this is fixed:', e);
+  }
+
+(function(){
+  // Realtime Database paths. DATA/USERS are shared across every device by design.
+  // Login/session state is deliberately NOT stored here — see SESSION_KEY below,
+  // which uses localStorage because it is a per-device concern, not shared data.
+  const DATA_PATH = 'ggplypl/data';
+  const USERS_PATH = 'ggplypl/users';
+  const SESSION_KEY = 'ggplypl-session'; // localStorage — which account is logged in on this device/browser
+  let state = {
+    teams: [],
+    matches: [],
+    tournaments: [],
+    playerTypes: {}, // name -> 'Batter' | 'Bowler' | 'All-rounder'
+    users: [],
+    currentUser: null, // {id, username, fullName, role}
+    authMode: 'login', // 'login' | 'signup'
+    authError: '',
+    view: 'dashboard',
+    activeMatchId: null,
+    activeTournamentId: null,
+    playersTab: 'batting',
+    rankingsTab: 'batters',
+    draftTournament: null,
+    showAddTourMatch: false,
+    confirmDeleteMatchId: null,
+    pendingNewBatsman: null // for prompting after wicket
+  };
+  let saveTimer = null;
+
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+  function isAdmin(){ return !!(state.currentUser && state.currentUser.role==='admin'); }
+
+  // NOTE: this is a lightweight, demo-level account system for gating what's shown in the UI —
+  // it is not secure authentication. Accounts live in shared storage (visible to anyone using
+  // this app), and the "password check" below is a simple non-cryptographic hash, not real
+  // encryption. Don't reuse a real/sensitive password here.
+  function simpleHash(str){
+    let h = 0;
+    for(let i=0;i<str.length;i++){ h = (Math.imul(31,h) + str.charCodeAt(i))|0; }
+    return 'h'+Math.abs(h).toString(36);
+  }
+
+  function persist(){
+    // Debounced so rapid-fire scoring taps don't fire a write per click —
+    // writes the full shared payload to Firebase Realtime Database.
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      const payload = { teams: state.teams, matches: state.matches, tournaments: state.tournaments, playerTypes: state.playerTypes };
+      try{
+        await set(ref(db, DATA_PATH), payload);
+      }catch(e){ console.error('Firebase save failed (match/team/tournament data):', e); }
+    }, 250);
+  }
+
+  async function persistUsers(){
+    try{
+      await set(ref(db, USERS_PATH), state.users);
+    }catch(e){ console.error('Firebase save failed (user accounts):', e); }
+  }
+
+  function persistSession(){
+    // Session/login state is a per-device concern, not shared cricket data —
+    // this intentionally stays in localStorage, never in Firebase.
+    try{
+      if(state.currentUser){
+        localStorage.setItem(SESSION_KEY, JSON.stringify({userId: state.currentUser.id}));
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    }catch(e){ console.error('Session save failed (localStorage):', e); }
+  }
+
+  async function load(){
+    try{
+      const snap = await get(ref(db, DATA_PATH));
+      if(snap.exists()){
+        const data = snap.val() || {};
+        state.teams = data.teams || [];
+        state.matches = data.matches || [];
+        state.tournaments = data.tournaments || [];
+        state.playerTypes = data.playerTypes || {};
+        state._lastDataRaw = JSON.stringify(data);
+      }
+    }catch(e){ console.error('Firebase load failed (match/team/tournament data):', e); }
+
+    try{
+      const usnap = await get(ref(db, USERS_PATH));
+      if(usnap.exists()){
+        state.users = usnap.val() || [];
+      }
+    }catch(e){ console.error('Firebase load failed (user accounts):', e); }
+
+    if(state.users.length===0){
+      // seed a default admin account so the app is usable out of the box
+      state.users.push({id:uid(), username:'admin', passwordHash:simpleHash('admin123'), fullName:'Admin', role:'admin'});
+      await persistUsers();
+    }
+
+    try{
+      const raw = localStorage.getItem(SESSION_KEY);
+      if(raw){
+        const sess = JSON.parse(raw);
+        if(sess && sess.userId){
+          const u = state.users.find(u=>u.id===sess.userId);
+          if(u) state.currentUser = u;
+        }
+      }
+    }catch(e){ console.error('Session load failed (localStorage):', e); }
+
+    // Real-time sync: viewers get pushed updates the instant the admin saves —
+    // no polling, no manual refresh. Admin skips this (their own local state,
+    // updated synchronously the moment they tap, is already the source of truth
+    // for their screen) — same behavior the old polling fallback used.
+    onValue(ref(db, DATA_PATH), (snap)=>{
+      if(!state.currentUser || isAdmin()) return;
+      if(!snap.exists()) return;
+      const data = snap.val() || {};
+      const raw = JSON.stringify(data);
+      if(raw === state._lastDataRaw) return;
+      state._lastDataRaw = raw;
+      state.teams = data.teams || [];
+      state.matches = data.matches || [];
+      state.tournaments = data.tournaments || [];
+      state.playerTypes = data.playerTypes || {};
+      render();
+    }, (err)=>{ console.error('Firebase realtime listener error (match/team/tournament data):', err); });
+
+    // Keep the account directory fresh in the background (new signups from
+    // other devices, role/type changes) without forcing a re-render — that
+    // would wipe out whatever someone is mid-typing in a login/signup form.
+    onValue(ref(db, USERS_PATH), (snap)=>{
+      if(!snap.exists()) return;
+      state.users = snap.val() || [];
+    }, (err)=>{ console.error('Firebase realtime listener error (user accounts):', err); });
+
+    render();
+  }
+
+  function setView(v, extra){
+    state.view = v;
+    if(extra) Object.assign(state, extra);
+    render();
+  }
+
+  // ---------- Derived stats ----------
+  function getTeam(id){ return state.teams.find(t=>t.id===id); }
+  function getMatch(id){ return state.matches.find(m=>m.id===id); }
+  function getPlayerType(name){ return state.playerTypes[name] || 'Not Set'; }
+
+
+  function computePlayerStats(matchList){
+    const matches = matchList || state.matches;
+    const stats = {}; // name -> {matches:Set, runs, balls, fours, sixes, outs, wickets, runsConceded, ballsBowled}
+    function ensure(name){
+      if(!stats[name]) stats[name] = {name, matches:new Set(), runs:0, balls:0, fours:0, sixes:0, outs:0, dismissals:0, wickets:0, runsConceded:0, ballsBowled:0};
+      return stats[name];
+    }
+    matches.forEach(m=>{
+      const involved = new Set();
+      (m.innings||[]).forEach(inn=>{
+        Object.entries(inn.batsmen||{}).forEach(([name, b])=>{
+          const s = ensure(name); involved.add(name);
+          s.runs += b.runs; s.balls += b.balls; s.fours += b.fours; s.sixes += b.sixes;
+          if(b.out) s.dismissals += 1;
+        });
+        Object.entries(inn.bowlers||{}).forEach(([name, b])=>{
+          const s = ensure(name); involved.add(name);
+          s.wickets += b.wickets; s.runsConceded += b.runs; s.ballsBowled += b.balls;
+        });
+      });
+      involved.forEach(name=> ensure(name).matches.add(m.id));
+    });
+    return Object.values(stats).map(s=>({
+      ...s,
+      matches: s.matches.size,
+      average: s.dismissals>0 ? (s.runs/s.dismissals) : (s.runs>0? s.runs : 0),
+      strikeRate: s.balls>0 ? (s.runs/s.balls*100) : 0,
+      economy: s.ballsBowled>0 ? (s.runsConceded/(s.ballsBowled/6)) : 0
+    }));
+  }
+
+  function oversStr(balls){
+    const o = Math.floor(balls/6); const b = balls%6;
+    return o + '.' + b;
+  }
+
+  function fmt1(n){ return Math.round(n*10)/10; }
+
+  function celebrateBoundary(runs){
+    const label = runs===6 ? 'six' : 'four';
+    const overlay = el('div',{class:'boundary-celebration'},[
+      el('div',{class:'txt '+label},[label.toUpperCase()+'!'])
+    ]);
+    document.body.appendChild(overlay);
+    setTimeout(()=>{ overlay.remove(); }, 1100);
+  }
+
+  // ---------- Match engine ----------
+  function newInnings(battingTeamId, bowlingTeamId){
+    return {
+      battingTeamId, bowlingTeamId,
+      runs:0, wickets:0, legalBalls:0,
+      striker:null, nonStriker:null, bowler:null,
+      batsmen:{}, bowlers:{},
+      thisOver:[], // display chips for current over
+      history:[], // full ball history for undo
+      completed:false
+    };
+  }
+
+  function ensureBatsman(inn, name){
+    if(!inn.batsmen[name]) inn.batsmen[name] = {runs:0, balls:0, fours:0, sixes:0, out:false};
+    return inn.batsmen[name];
+  }
+  function ensureBowler(inn, name){
+    if(!inn.bowlers[name]) inn.bowlers[name] = {runs:0, balls:0, wickets:0};
+    return inn.bowlers[name];
+  }
+
+  function currentInnings(match){ return match.innings[match.innings.length-1]; }
+
+  function playBall(match, {runsOffBat=0, extraType=null, isWicket=false}){
+    const inn = currentInnings(match);
+    if(!inn.striker || !inn.nonStriker || !inn.bowler) return;
+    const legal = !(extraType==='wide' || extraType==='noball');
+    const extraRuns = (extraType==='wide' || extraType==='noball') ? 1 : 0;
+    const teamRuns = runsOffBat + extraRuns;
+    const batsmanRuns = (extraType==='bye' || extraType==='legbye' || extraType==='wide') ? 0 : runsOffBat;
+
+    inn.runs += teamRuns;
+    const bat = ensureBatsman(inn, inn.striker);
+    const bowl = ensureBowler(inn, inn.bowler);
+
+    if(legal){
+      bat.balls += 1;
+      bowl.balls += 1;
+    }
+    bat.runs += batsmanRuns;
+    if(batsmanRuns===4) bat.fours += 1;
+    if(batsmanRuns===6) bat.sixes += 1;
+    bowl.runs += teamRuns;
+
+    let dismissedName = null;
+    if(isWicket){
+      inn.wickets += 1;
+      bat.out = true;
+      bowl.wickets += 1;
+      dismissedName = inn.striker;
+    }
+
+    // record for undo + display
+    const chip = isWicket ? 'W' : (extraType==='wide' ? 'Wd' : extraType==='noball' ? 'Nb' : extraType==='bye' ? teamRuns+'b' : extraType==='legbye' ? teamRuns+'lb' : String(runsOffBat));
+    inn.history.push({runsOffBat, extraType, isWicket, striker:inn.striker, nonStriker:inn.nonStriker, bowler:inn.bowler, legal, teamRunsAdded:teamRuns, dismissedName});
+    if(legal) inn.thisOver.push(chip); else inn.thisOver.push(chip);
+
+    if(legal) inn.legalBalls += 1;
+
+    // strike rotation on odd runs (off bat runs matter for byes/legbyes too)
+    const runsForRotation = (extraType==='bye'||extraType==='legbye') ? runsOffBat : (extraType==='wide'||extraType==='noball' ? runsOffBat : runsOffBat);
+    if(runsForRotation % 2 === 1){
+      const tmp = inn.striker; inn.striker = inn.nonStriker; inn.nonStriker = tmp;
+    }
+
+    // over complete
+    if(legal && inn.legalBalls % 6 === 0){
+      inn.thisOver = [];
+      const tmp = inn.striker; inn.striker = inn.nonStriker; inn.nonStriker = tmp;
+      inn.bowler = null; // force selecting next over's bowler
+    }
+
+    if(isWicket){
+      inn.striker = null; // force selecting new batsman
+    }
+
+    persist();
+  }
+
+  function battingTeamPlayersRemaining(match, inn){
+    const team = getTeam(inn.battingTeamId);
+    if(!team) return [];
+    return team.players.filter(p => !(inn.batsmen[p] && inn.batsmen[p].out) && p!==inn.striker && p!==inn.nonStriker);
+  }
+
+  // ---------- Views ----------
+  function render(){
+    const root = document.getElementById('root');
+    root.innerHTML = '';
+    if(!state.currentUser){
+      root.appendChild(buildAuthPage());
+      return;
+    }
+    root.appendChild(buildTopbar());
+    const main = document.createElement('div');
+    main.className='main';
+    main.appendChild(buildView());
+    root.appendChild(main);
+  }
+
+  function el(tag, opts, children){
+    const e = document.createElement(tag);
+    if(opts){
+      Object.entries(opts).forEach(([k,v])=>{
+        if(k==='class') e.className = v;
+        else if(k==='html') e.innerHTML = v;
+        else if(k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+        else e.setAttribute(k, v);
+      });
+    }
+    (children||[]).forEach(c=>{ if(c) e.appendChild(typeof c==='string'? document.createTextNode(c): c); });
+    return e;
+  }
+
+  // ---------- Auth ----------
+  function buildAuthPage(){
+    const outer = el('div', {class:'app', style:'align-items:center; justify-content:center; padding:40px 16px;'});
+    const box = el('div', {class:'auth-box'});
+    box.appendChild(el('div', {class:'brand', style:'justify-content:center; margin-bottom:18px;'}, [
+      el('div', {class:'brand-mark'}),
+      el('div', {class:'brand-name display-font', html:'GGPL&amp;YPL', style:'color:var(--pitch-green);'})
+    ]));
+
+    const tabs = el('div',{class:'tabs', style:'justify-content:center;'});
+    [['login','Log In'],['signup','Sign Up']].forEach(([k,label])=>{
+      tabs.appendChild(el('button',{class: state.authMode===k?'active':'', onClick:()=>{ state.authMode=k; state.authError=''; render(); }},[label]));
+    });
+    box.appendChild(tabs);
+
+    const errBox = el('div',{style: state.authError? 'color:var(--ball-red); font-size:12px; margin-bottom:10px; font-weight:700;':'display:none;'},[state.authError]);
+    box.appendChild(errBox);
+
+    if(state.authMode==='login'){
+      const uField = inputField('Username','text','your username');
+      const pField = inputField('Password','password','your password');
+      box.appendChild(uField); box.appendChild(pField);
+      box.appendChild(el('button',{class:'btn btn-primary btn-block', onClick: async ()=>{
+        const username = uField.querySelector('input').value.trim();
+        const password = pField.querySelector('input').value;
+        const u = state.users.find(u=>u.username.toLowerCase()===username.toLowerCase());
+        if(!u || u.passwordHash !== simpleHash(password)){
+          state.authError = 'Incorrect username or password.'; render(); return;
+        }
+        state.currentUser = u;
+        state.view='dashboard';
+        await persistSession();
+        render();
+      }},['Log In']));
+    } else {
+      const nField = inputField('Full name','text','your name');
+      const eField = inputField('Email','email','you@example.com');
+      const uField = inputField('Choose a username','text','username');
+      const pField = inputField('Choose a password','password','password');
+      box.appendChild(nField); box.appendChild(eField); box.appendChild(uField); box.appendChild(pField);
+      box.appendChild(el('p',{class:'hint', style:'margin:-6px 0 12px;'},['New accounts can watch live scores and view the points table. Match/tournament setup is done by an admin.']));
+      box.appendChild(el('button',{class:'btn btn-primary btn-block', onClick: async ()=>{
+        const fullName = nField.querySelector('input').value.trim();
+        const email = eField.querySelector('input').value.trim();
+        const username = uField.querySelector('input').value.trim();
+        const password = pField.querySelector('input').value;
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if(!fullName || !email || !username || password.length<4){
+          state.authError = 'Please fill every field (password: 4+ characters).'; render(); return;
+        }
+        if(!emailOk){
+          state.authError = 'Please enter a valid email address.'; render(); return;
+        }
+        if(state.users.some(u=>u.username.toLowerCase()===username.toLowerCase())){
+          state.authError = 'That username is already taken.'; render(); return;
+        }
+        if(state.users.some(u=>u.email && u.email.toLowerCase()===email.toLowerCase())){
+          state.authError = 'That email is already registered.'; render(); return;
+        }
+        const newUser = {id:uid(), username, email, passwordHash:simpleHash(password), fullName, role:'user', createdAt: Date.now()};
+        state.users.push(newUser);
+        await persistUsers();
+        state.currentUser = newUser;
+        state.view='dashboard';
+        await persistSession();
+        render();
+      }},['Create Account']));
+    }
+    outer.appendChild(box);
+    return outer;
+  }
+
+  function buildTopbar(){
+    const nav = el('div', {class:'nav'});
+    const tabs = [['dashboard','Matches'],['players','Players'],['tournaments','Tournaments'],['rankings','Rankings'],['leaderboard','Leaderboard'],['me','Me'],['about','About']];
+    tabs.forEach(([v,label])=>{
+      const b = el('button', {class: state.view===v || (v==='dashboard' && (state.view==='newMatch'||state.view==='scoring')) ? 'active':'', onClick:()=>setView(v)}, [label]);
+      nav.appendChild(b);
+    });
+    const userBox = el('div', {class:'user-box'}, [
+      el('div',{},[
+        el('div',{style:'font-weight:800; font-size:12.5px;'},[state.currentUser.fullName]),
+        el('div',{class:'role-pill '+(isAdmin()?'admin':'user')},[isAdmin()?'Admin':'User'])
+      ]),
+      el('button',{class:'btn btn-outline btn-sm', style:'border-color:var(--cream-dim); color:var(--cream-dim);', onClick: async ()=>{
+        state.currentUser = null;
+        await persistSession();
+        render();
+      }},['Log Out'])
+    ]);
+    return el('div', {class:'topbar'}, [
+      el('div', {class:'brand'}, [
+        el('div', {class:'brand-mark'}),
+        el('div', {class:'brand-name display-font', html:'GGPL&amp;YPL'}),
+        el('a', {href:'https://www.instagram.com/ypl_s2?igsh=OTh4Z2pxbTlzMTZ1', target:'_blank', rel:'noopener noreferrer', title:'GGPL&YPL on Instagram', class:'insta-link', html:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>'})
+      ]),
+      nav,
+      userBox
+    ]);
+  }
+
+  function buildView(){
+    switch(state.view){
+      case 'dashboard': return viewDashboard();
+      case 'newMatch': return isAdmin()? viewNewMatch() : viewDashboard();
+      case 'scoring': return viewScoring();
+      case 'players': return viewPlayers();
+      case 'tournaments': return viewTournaments();
+      case 'rankings': return viewRankings();
+      case 'leaderboard': return viewLeaderboard();
+      case 'me': return viewProfile();
+      case 'about': return viewAbout();
+      default: return viewDashboard();
+    }
+  }
+
+  function buildMatchCard(m){
+    const t1 = getTeam(m.team1Id), t2 = getTeam(m.team2Id);
+    const actions = el('div',{style:'display:flex; gap:6px; align-items:center; flex-wrap:wrap;'});
+
+    if(isAdmin() && state.confirmDeleteMatchId === m.id){
+      actions.appendChild(el('span',{style:'font-size:12px; font-weight:800; color:var(--ball-red);'},['Delete this match?']));
+      actions.appendChild(el('button',{class:'btn btn-sm', style:'background:var(--ball-red); color:var(--white); border:none;', onClick:(e)=>{
+        e.stopPropagation();
+        state.matches = state.matches.filter(x=>x.id!==m.id);
+        state.confirmDeleteMatchId = null;
+        persist();
+        render();
+      }},['OK, Delete']));
+      actions.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:(e)=>{
+        e.stopPropagation();
+        state.confirmDeleteMatchId = null;
+        render();
+      }},['Back']));
+    } else {
+      actions.appendChild(el('div',{class:'status-pill '+(m.status)},[m.status]));
+      actions.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:(e)=>{ e.stopPropagation(); setView('scoring',{activeMatchId:m.id}); }},['View']));
+      if(isAdmin()){
+        actions.appendChild(el('button',{class:'btn btn-sm', style:'background:var(--ball-red); color:var(--white); border:none;', onClick:(e)=>{
+          e.stopPropagation();
+          state.confirmDeleteMatchId = m.id;
+          render();
+        }},['Delete']));
+      }
+    }
+
+    return el('div',{class:'match-card', style:'cursor:default;'},[
+      el('div',{},[
+        el('div',{class:'match-name'},[(t1?t1.name:'Team 1')+' vs '+(t2?t2.name:'Team 2')]),
+        el('div',{class:'match-meta'},[m.name+' · '+m.totalOvers+' overs'+(m.location? ' · 📍 '+m.location : '')+(m.toss? ' · Toss: '+m.toss.winnerName+' ('+m.toss.decision+')' : '')+(m.result? ' · '+m.result : '')])
+      ]),
+      actions
+    ]);
+  }
+
+  // ---- Dashboard ----
+  function viewDashboard(){
+    const wrap = el('div', {});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Matches']));
+    wrap.appendChild(el('p',{class:'page-sub'},[isAdmin() ? 'Score a game ball by ball, or jump back into one in progress.' : 'Watch live scores from matches an admin is running.']));
+    if(isAdmin()){
+      wrap.appendChild(el('button',{class:'btn btn-primary', onClick:()=>setView('newMatch')},['+ New Match']));
+    }
+    const list = el('div',{class:'card', style:'margin-top:18px;'});
+    list.appendChild(el('div',{class:'card-title'},['All Matches']));
+    if(state.matches.length===0){
+      list.appendChild(el('div',{class:'empty'},[
+        el('div',{class:'big'},['No matches yet']),
+        el('div',{},[isAdmin() ? 'Start your first match to begin live scoring.' : 'No admin has started a match yet — check back soon.'])
+      ]));
+    } else {
+      [...state.matches].reverse().forEach(m=>{
+        list.appendChild(buildMatchCard(m));
+      });
+    }
+    wrap.appendChild(list);
+
+    if(isAdmin()){
+      const regCard = el('div',{class:'card'});
+      regCard.appendChild(el('div',{class:'card-title'},['Registered Players']));
+      const viewers = state.users.filter(u=>u.role!=='admin');
+      if(viewers.length===0){
+        regCard.appendChild(el('div',{class:'empty'},['No one has signed up yet.']));
+      } else {
+        const table = el('table',{});
+        const thead = el('tr',{});
+        ['Name','Username','Email','Signed Up','Player Type','Batting Hand','Bowling Style'].forEach(h=>thead.appendChild(el('th',{},[h])));
+        table.appendChild(thead);
+        [...viewers].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(v=>{
+          const tr = el('tr',{});
+          const signedUp = v.createdAt ? new Date(v.createdAt).toLocaleDateString() : '—';
+          [v.fullName, v.username, v.email||'—', signedUp, getPlayerType(v.fullName), v.battingHand||'Not Set', v.bowlingStyle||'Not Set'].forEach(val=>tr.appendChild(el('td',{},[String(val)])));
+          table.appendChild(tr);
+        });
+        regCard.appendChild(table);
+      }
+      wrap.appendChild(regCard);
+    }
+
+    return wrap;
+  }
+
+  // ---- New Match ----
+  function viewNewMatch(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['New Match']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Set up both sides and start scoring.']));
+    const card = el('div',{class:'card'});
+
+    const matchName = inputField('Match name', 'text', 'e.g. Sunday League Final');
+    const location = inputField('Location / Venue (optional)', 'text', 'e.g. MPP School Ground');
+    const overs = inputField('Overs per innings', 'number', '20');
+    overs.querySelector('input').value = '20';
+
+    const t1name = inputField('Team 1 name', 'text', 'e.g. Warriors');
+    const t1players = inputField('Team 1 players (comma separated)', 'text', 'Aarav, Vikram, Rohan, ...');
+    const t2name = inputField('Team 2 name', 'text', 'e.g. Titans');
+    const t2players = inputField('Team 2 players (comma separated)', 'text', 'Karan, Dev, Sanjay, ...');
+
+    const tossRow = el('div',{class:'row'});
+    const tossWinnerField = el('div',{class:'field'});
+    tossWinnerField.appendChild(el('label',{},['Toss won by']));
+    const tossWinnerSel = el('select',{});
+    tossWinnerSel.appendChild(el('option',{value:'t1'},['Team 1']));
+    tossWinnerSel.appendChild(el('option',{value:'t2'},['Team 2']));
+    tossWinnerField.appendChild(tossWinnerSel);
+
+    const tossDecisionField = el('div',{class:'field'});
+    tossDecisionField.appendChild(el('label',{},['Elected to']));
+    const tossDecisionSel = el('select',{});
+    tossDecisionSel.appendChild(el('option',{value:'bat'},['Bat']));
+    tossDecisionSel.appendChild(el('option',{value:'bowl'},['Bowl']));
+    tossDecisionField.appendChild(tossDecisionSel);
+
+    tossRow.appendChild(tossWinnerField);
+    tossRow.appendChild(tossDecisionField);
+
+    card.appendChild(el('div',{class:'card-title'},['Match Details']));
+    card.appendChild(matchName);
+    card.appendChild(location);
+    card.appendChild(overs);
+    card.appendChild(el('div',{class:'row'},[t1name, t2name]));
+    card.appendChild(el('div',{class:'row'},[t1players, t2players]));
+    card.appendChild(tossRow);
+
+    const err = el('div',{style:'color:var(--ball-red); font-size:12px; margin:8px 0; display:none;'});
+    card.appendChild(err);
+
+    const btnRow = el('div',{style:'display:flex; gap:10px; margin-top:6px;'});
+    btnRow.appendChild(el('button',{class:'btn btn-primary', onClick:()=>{
+      const mName = matchName.querySelector('input').value.trim() || 'Untitled Match';
+      const totalOvers = parseInt(overs.querySelector('input').value) || 20;
+      const n1 = t1name.querySelector('input').value.trim();
+      const n2 = t2name.querySelector('input').value.trim();
+      const p1 = t1players.querySelector('input').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const p2 = t2players.querySelector('input').value.split(',').map(s=>s.trim()).filter(Boolean);
+      if(!n1 || !n2 || p1.length<2 || p2.length<2){
+        err.textContent = 'Please name both teams and add at least 2 players each.';
+        err.style.display='block';
+        return;
+      }
+      const team1 = {id:uid(), name:n1, players:p1};
+      const team2 = {id:uid(), name:n2, players:p2};
+      state.teams.push(team1, team2);
+      const tossWinnerTeam = tossWinnerSel.value==='t1' ? team1 : team2;
+      const tossLoserTeam = tossWinnerSel.value==='t1' ? team2 : team1;
+      const decision = tossDecisionSel.value; // 'bat' or 'bowl'
+      const battingFirst = decision==='bat' ? tossWinnerTeam : tossLoserTeam;
+      const bowlingFirst = decision==='bat' ? tossLoserTeam : tossWinnerTeam;
+      const match = {
+        id: uid(), name: mName, team1Id: team1.id, team2Id: team2.id,
+        totalOvers, status:'live', tournamentId: state.pendingTournamentId || null,
+        location: location.querySelector('input').value.trim(),
+        toss: { winnerName: tossWinnerTeam.name, decision },
+        innings: [ newInnings(battingFirst.id, bowlingFirst.id) ],
+        result: null
+      };
+      state.matches.push(match);
+      state.pendingTournamentId = null;
+      persist();
+      setView('scoring', {activeMatchId: match.id});
+    }},['Start Match']));
+    btnRow.appendChild(el('button',{class:'btn btn-outline', onClick:()=>setView('dashboard')},['Cancel']));
+    card.appendChild(btnRow);
+
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  function inputField(label, type, placeholder){
+    const f = el('div',{class:'field'});
+    f.appendChild(el('label',{},[label]));
+    f.appendChild(el('input',{type, placeholder: placeholder||''}));
+    return f;
+  }
+
+  // ---- Scoring ----
+  function viewScoring(){
+    const match = getMatch(state.activeMatchId);
+    if(!match) { const w=el('div',{}); w.appendChild(el('div',{class:'empty'},['Match not found.'])); return w; }
+    const inn = currentInnings(match);
+    const battingTeam = getTeam(inn.battingTeamId);
+    const bowlingTeam = getTeam(inn.bowlingTeamId);
+
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},[match.name]));
+    wrap.appendChild(el('p',{class:'page-sub'},[battingTeam.name+' vs '+bowlingTeam.name+' · '+match.totalOvers+' overs a side']));
+    if(match.toss){
+      wrap.appendChild(el('p',{class:'page-sub', style:'margin-top:-16px; font-weight:700; color:var(--field-green);'},['Toss: '+match.toss.winnerName+' won and elected to '+match.toss.decision+'.']));
+    }
+
+    if(match.status==='completed'){
+      wrap.appendChild(buildMatchSummary(match));
+      wrap.appendChild(el('button',{class:'btn btn-outline', onClick:()=>setView('dashboard')},['Back to Matches']));
+      return wrap;
+    }
+
+    // 1st innings recap — always visible once the chase is on
+    if(match.innings.length > 1){
+      const inn1 = match.innings[0];
+      const team1 = getTeam(inn1.battingTeamId);
+      wrap.appendChild(el('div',{class:'card', style:'padding:12px 16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;'},[
+        el('div',{style:'font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:#5A6459;'},['1st Innings']),
+        el('div',{class:'mono', style:'font-weight:800; font-size:15px;'},[team1.name+'  '+inn1.runs+'/'+inn1.wickets+'  ('+oversStr(inn1.legalBalls)+' ov)'])
+      ]));
+    }
+
+    // Scoreboard
+    const sb = el('div',{class:'scoreboard'});
+    const crr = inn.legalBalls>0 ? (inn.runs/(inn.legalBalls/6)) : 0;
+    sb.appendChild(el('div',{class:'scoreboard-top'},[
+      el('div',{},[
+        el('div',{class:'sb-team'},[battingTeam.name + ' — Innings ' + match.innings.length]),
+        el('div',{class:'sb-score mono'},[
+          el('span',{},[inn.runs+'']), el('span',{class:'wk'},['/'+inn.wickets])
+        ])
+      ]),
+      el('div',{class:'sb-oversbox'},[
+        el('div',{class:'lbl'},['Overs']),
+        el('div',{class:'val mono'},[oversStr(inn.legalBalls)+' / '+match.totalOvers]),
+        el('div',{class:'sb-crr'},['CRR '+fmt1(crr)])
+      ])
+    ]));
+
+    if(match.innings.length > 1){
+      const inn1 = match.innings[0];
+      const target = inn1.runs + 1;
+      const totalBalls = match.totalOvers*6;
+      const ballsRemaining = Math.max(0, totalBalls - inn.legalBalls);
+      const runsNeeded = Math.max(0, target - inn.runs);
+      const rrr = ballsRemaining>0 ? (runsNeeded/(ballsRemaining/6)) : 0;
+      let chaseLine;
+      if(inn.runs >= target){
+        chaseLine = 'Target reached';
+      } else if(ballsRemaining<=0 || inn.completed){
+        chaseLine = 'Innings over';
+      } else {
+        chaseLine = 'Need ' + runsNeeded + ' runs off ' + ballsRemaining + ' balls · RRR ' + fmt1(rrr);
+      }
+      sb.appendChild(el('div',{class:'sb-status'},['Target '+target+' · '+chaseLine]));
+    }
+
+    if(inn.striker){
+      sb.appendChild(el('div',{class:'batting-row striker'},[
+        el('div',{},['★ '+inn.striker]),
+        el('div',{class:'stats mono'},[battingLine(inn, inn.striker)])
+      ]));
+    }
+    if(inn.nonStriker){
+      sb.appendChild(el('div',{class:'batting-row'},[
+        el('div',{},[inn.nonStriker]),
+        el('div',{class:'stats mono'},[battingLine(inn, inn.nonStriker)])
+      ]));
+    }
+    if(inn.bowler){
+      const bb = inn.bowlers[inn.bowler] || {runs:0,balls:0,wickets:0};
+      sb.appendChild(el('div',{class:'bowler-row'},[
+        el('div',{},[inn.bowler]),
+        el('div',{class:'stats mono'},[oversStr(bb.balls)+' ov · '+bb.runs+' r · '+bb.wickets+' w'])
+      ]));
+    }
+    if(inn.thisOver.length){
+      const log = el('div',{class:'over-log'});
+      inn.thisOver.forEach(c=>{
+        let cls='ball-chip';
+        if(c==='W') cls+=' w'; else if(c==='4') cls+=' b4'; else if(c==='6') cls+=' b6';
+        log.appendChild(el('div',{class:cls},[c]));
+      });
+      sb.appendChild(log);
+    }
+    sb.appendChild(el('div',{class:'sb-watermark mono'},['GGPL&YPL']));
+    wrap.appendChild(sb);
+
+    // Innings-over / all-out / target-reached checks
+    let inningsOver = inn.legalBalls >= match.totalOvers*6 || inn.wickets >= (battingTeam.players.length - 1);
+    if(match.innings.length > 1){
+      const target = match.innings[0].runs + 1;
+      if(inn.runs >= target) inningsOver = true; // chase completed — no need to bowl the rest
+    }
+    if(inningsOver && !inn.completed){
+      inn.completed = true;
+      persist();
+    }
+
+    if(inn.completed){
+      wrap.appendChild(buildInningsBreak(match, inn));
+      return wrap;
+    }
+
+    if(!isAdmin()){
+      const waitCard = el('div',{class:'card'});
+      if(!inn.striker || !inn.nonStriker || !inn.bowler){
+        waitCard.appendChild(el('div',{class:'card-title'},['Live']));
+        waitCard.appendChild(el('p',{},['Waiting for the admin to continue scoring…']));
+      } else {
+        waitCard.appendChild(el('div',{class:'card-title'},['Live']));
+        waitCard.appendChild(el('p',{},['Following along ball by ball. This screen updates as the admin scores.']));
+      }
+      waitCard.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>setView('dashboard')},['Back to Matches']));
+      wrap.appendChild(waitCard);
+      return wrap;
+    }
+
+    // Need new batsman?
+    if(!inn.striker || !inn.nonStriker){
+      wrap.appendChild(buildSelectBatsmen(match, inn, battingTeam));
+      return wrap;
+    }
+    // Need new bowler?
+    if(!inn.bowler){
+      wrap.appendChild(buildSelectBowler(match, inn, bowlingTeam));
+      return wrap;
+    }
+
+    // Scoring pad
+    const padCard = el('div',{class:'card'});
+    padCard.appendChild(el('div',{class:'card-title'},['Score This Ball']));
+
+  const grid = el('div',{class:'pad-grid'});
+    [0,1,2,3,4,5,6].forEach(r=>{
+      const cls = 'pad-btn'+(r===4?' four':'')+(r===6?' six':'');
+      grid.appendChild(el('button',{class:cls, onClick:()=>{
+        playBall(match,{runsOffBat:r});
+        if(r===4 || r===6) celebrateBoundary(r);
+        render();
+      }},[String(r)]));
+    });
+    grid.appendChild(el('div',{}));
+    padCard.appendChild(grid);
+
+    const extras = el('div',{class:'extras-grid'});
+    [['Wide','wide'],['No Ball','noball'],['Bye (1)','bye'],['Leg Bye (1)','legbye']].forEach(([label,type])=>{
+      extras.appendChild(el('button',{onClick:()=>{ playBall(match,{runsOffBat: (type==='bye'||type==='legbye')?1:0, extraType:type}); render(); }},[label]));
+    });
+    padCard.appendChild(extras);
+
+    padCard.appendChild(el('button',{class:'wicket-btn', onClick:()=>{ playBall(match,{runsOffBat:0, isWicket:true}); render(); }},['Wicket!']));
+
+    const undoRow = el('div',{style:'display:flex; gap:8px;'});
+    undoRow.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>{ undoLastBall(match); render(); }, disabled: inn.history.length===0 ? 'disabled': null},['Undo Last Ball']));
+    undoRow.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>setView('dashboard')},['Save & Exit']));
+    padCard.appendChild(undoRow);
+
+    wrap.appendChild(padCard);
+    return wrap;
+  }
+
+  function battingLine(inn, name){
+    const b = inn.batsmen[name] || {runs:0,balls:0,fours:0,sixes:0};
+    return b.runs+' ('+b.balls+'b, '+b.fours+'x4, '+b.sixes+'x6)';
+  }
+
+  function chipFor(h){
+    return h.isWicket ? 'W' : (h.extraType==='wide' ? 'Wd' : h.extraType==='noball' ? 'Nb' : h.extraType==='bye' ? h.teamRunsAdded+'b' : h.extraType==='legbye' ? h.teamRunsAdded+'lb' : String(h.runsOffBat));
+  }
+
+  function rebuildThisOver(inn){
+    let legalCount = 0;
+    let over = [];
+    inn.history.forEach(h=>{
+      over.push(chipFor(h));
+      if(h.legal){
+        legalCount++;
+        if(legalCount % 6 === 0) over = [];
+      }
+    });
+    inn.thisOver = over;
+  }
+
+  function undoLastBall(match){
+    const inn = currentInnings(match);
+    const last = inn.history.pop();
+    if(!last) return;
+    const legal = !(last.extraType==='wide'||last.extraType==='noball');
+    const extraRuns = (last.extraType==='wide'||last.extraType==='noball') ? 1:0;
+    const teamRuns = last.runsOffBat + extraRuns;
+    const batsmanRuns = (last.extraType==='bye'||last.extraType==='legbye'||last.extraType==='wide') ? 0 : last.runsOffBat;
+    inn.runs -= teamRuns;
+    if(inn.batsmen[last.striker]){
+      const b = inn.batsmen[last.striker];
+      if(legal) b.balls -= 1;
+      b.runs -= batsmanRuns;
+      if(batsmanRuns===4) b.fours -=1;
+      if(batsmanRuns===6) b.sixes -=1;
+      if(last.isWicket) b.out = false;
+    }
+    if(inn.bowlers[last.bowler]){
+      const bw = inn.bowlers[last.bowler];
+      if(legal) bw.balls -= 1;
+      bw.runs -= teamRuns;
+      if(last.isWicket) bw.wickets -= 1;
+    }
+    if(last.isWicket) inn.wickets -= 1;
+    // restore strikers/bowler exactly as they were before this ball was bowled
+    inn.striker = last.striker;
+    inn.nonStriker = last.nonStriker;
+    inn.bowler = last.bowler;
+    if(legal) inn.legalBalls -= 1;
+    rebuildThisOver(inn);
+    inn.completed = false;
+    persist();
+  }
+
+  function buildSelectBatsmen(match, inn, battingTeam){
+    const card = el('div',{class:'card'});
+    card.appendChild(el('div',{class:'card-title'},['Select Batsmen']));
+    const available = battingTeam.players.filter(p=>!(inn.batsmen[p]&&inn.batsmen[p].out));
+    if(available.length < (inn.striker?0:1) + (inn.nonStriker?0:1)){
+      card.appendChild(el('div',{class:'empty'},['Not enough players left to continue the innings.']));
+      return card;
+    }
+    if(!inn.striker){
+      const sel = buildPlayerSelect(available.filter(p=>p!==inn.nonStriker));
+      card.appendChild(labelledRow('On strike', sel, ()=>{
+        inn.striker = sel.value; render();
+      }, 'Set Striker'));
+    }
+    if(!inn.nonStriker){
+      const sel2 = buildPlayerSelect(available.filter(p=>p!==inn.striker));
+      card.appendChild(labelledRow('At the other end', sel2, ()=>{
+        inn.nonStriker = sel2.value; render();
+      }, 'Set Non-Striker'));
+    }
+    if(inn.history.length>0){
+      card.appendChild(el('button',{class:'btn btn-outline btn-sm', style:'margin-top:10px;', onClick:()=>{ undoLastBall(match); render(); }},['Undo Last Ball']));
+    }
+    return card;
+  }
+
+  function buildSelectBowler(match, inn, bowlingTeam){
+    const card = el('div',{class:'card'});
+    card.appendChild(el('div',{class:'card-title'},['Select Bowler for Next Over']));
+    const sel = buildPlayerSelect(bowlingTeam.players);
+    card.appendChild(labelledRow('Bowler', sel, ()=>{
+      inn.bowler = sel.value; render();
+    }, 'Start Over'));
+    if(inn.history.length>0){
+      card.appendChild(el('button',{class:'btn btn-outline btn-sm', style:'margin-top:10px;', onClick:()=>{ undoLastBall(match); render(); }},['Undo Last Ball']));
+    }
+    return card;
+  }
+
+  function buildPlayerSelect(players){
+    const sel = el('select',{});
+    players.forEach(p=> sel.appendChild(el('option',{value:p},[p])));
+    return sel;
+  }
+
+  function labelledRow(label, selectEl, onGo, btnLabel){
+    const row = el('div',{class:'inline-form'});
+    const f = el('div',{class:'field'});
+    f.appendChild(el('label',{},[label]));
+    f.appendChild(selectEl);
+    row.appendChild(f);
+    row.appendChild(el('button',{class:'btn btn-secondary btn-sm', onClick:onGo},[btnLabel]));
+    return row;
+  }
+
+  function buildInningsBreak(match, inn){
+    const card = el('div',{class:'card'});
+    const battingTeam = getTeam(inn.battingTeamId);
+    card.appendChild(el('div',{class:'card-title'},['Innings Complete']));
+    card.appendChild(el('p',{},[battingTeam.name+' scored '+inn.runs+'/'+inn.wickets+' in '+oversStr(inn.legalBalls)+' overs.']));
+
+    if(match.innings.length===1){
+      const target = inn.runs+1;
+      card.appendChild(el('p',{},['Target: '+target+' runs to win.']));
+      if(isAdmin()){
+        card.appendChild(el('button',{class:'btn btn-primary', onClick:()=>{
+          match.innings.push(newInnings(inn.bowlingTeamId, inn.battingTeamId));
+          persist();
+          render();
+        }},['Start 2nd Innings']));
+      } else {
+        card.appendChild(el('p',{class:'hint'},['Waiting for the admin to start the 2nd innings…']));
+      }
+    } else {
+      const inn1 = match.innings[0], inn2 = match.innings[1];
+      const team1 = getTeam(inn1.battingTeamId), team2 = getTeam(inn2.battingTeamId);
+      let result;
+      if(inn2.runs > inn1.runs){
+        const wicketsRemaining = Math.max(0, team2.players.length - 1 - inn2.wickets);
+        result = team2.name+' won by '+wicketsRemaining+' wicket'+(wicketsRemaining===1?'':'s');
+      }
+      else if(inn1.runs > inn2.runs) result = team1.name+' won by '+(inn1.runs-inn2.runs)+' runs';
+      else result = 'Match tied';
+      match.status='completed';
+      match.result = result;
+      persist();
+      card.appendChild(el('p',{style:'font-weight:800;'},[result]));
+      card.appendChild(el('button',{class:'btn btn-primary', onClick:()=>render()},['View Summary']));
+    }
+    card.appendChild(el('div',{class:'card-watermark mono'},['GGPL&YPL']));
+    return card;
+  }
+
+  function buildMatchSummary(match){
+    const wrap = el('div',{});
+    const card = el('div',{class:'card'});
+    card.appendChild(el('div',{class:'card-title'},['Result']));
+    card.appendChild(el('p',{style:'font-weight:800; font-size:16px;'},[match.result || 'Match completed']));
+    if(match.toss){
+      card.appendChild(el('p',{class:'hint', style:'margin-top:-6px;'},['Toss: '+match.toss.winnerName+' won and elected to '+match.toss.decision+'.']));
+    }
+    match.innings.forEach((inn,i)=>{
+      const t = getTeam(inn.battingTeamId);
+      const sc = el('div',{style:'margin-top:14px;'});
+      sc.appendChild(el('div',{class:'card-title'},[t.name+' — Innings '+(i+1)+': '+inn.runs+'/'+inn.wickets+' ('+oversStr(inn.legalBalls)+' ov)']));
+      const table = el('table',{});
+      const thead = el('tr',{});
+      ['Batsman','R','B','4s','6s','SR'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      Object.entries(inn.batsmen).forEach(([name,b])=>{
+        const tr = el('tr',{});
+        [name+(b.out?'':' *'), b.runs, b.balls, b.fours, b.sixes, b.balls>0?fmt1(b.runs/b.balls*100):'0'].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      sc.appendChild(table);
+
+      const table2 = el('table',{style:'margin-top:8px;'});
+      const thead2 = el('tr',{});
+      ['Bowler','O','R','W','Econ'].forEach(h=>thead2.appendChild(el('th',{},[h])));
+      table2.appendChild(thead2);
+      Object.entries(inn.bowlers).forEach(([name,b])=>{
+        const tr = el('tr',{});
+        [name, oversStr(b.balls), b.runs, b.wickets, b.balls>0?fmt1(b.runs/(b.balls/6)):'0'].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table2.appendChild(tr);
+      });
+      sc.appendChild(table2);
+      card.appendChild(sc);
+    });
+
+    const awards = computeMatchAwards(match);
+    if(awards){
+      const awardsCard = el('div',{style:'margin-top:16px; padding-top:14px; border-top:1px dashed #E4DEC9;'});
+      awardsCard.appendChild(el('div',{class:'card-title'},['Match Awards']));
+      const row = el('div',{style:'display:flex; gap:14px; flex-wrap:wrap;'});
+      const awardBox = (label, name, detail)=> el('div',{style:'flex:1; min-width:150px; background:#FBF9F2; border:1px solid #EDE7D3; border-radius:6px; padding:12px 14px;'},[
+        el('div',{style:'font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--field-green); margin-bottom:4px;'},[label]),
+        el('div',{style:'font-weight:800; font-size:15px;'},[name || '—']),
+        el('div',{class:'mono', style:'font-size:12px; color:#8A8F7E; margin-top:2px;'},[detail || ''])
+      ]);
+      if(awards.bestBatter) row.appendChild(awardBox('Best Batter', awards.bestBatter.name, awards.bestBatter.runs+' runs ('+awards.bestBatter.balls+'b)'));
+      if(awards.bestBowler) row.appendChild(awardBox('Best Bowler', awards.bestBowler.name, awards.bestBowler.wickets+' wkts, '+fmt1(awards.bestBowler.economy)+' econ'));
+      if(awards.gameChanger) row.appendChild(awardBox('Game Changer', awards.gameChanger.name, awards.gameChanger.runs+' runs · '+awards.gameChanger.wickets+' wkts'));
+      awardsCard.appendChild(row);
+      card.appendChild(awardsCard);
+    }
+
+    card.appendChild(el('div',{class:'card-watermark mono'},['GGPL&YPL']));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  function computeMatchAwards(match){
+    const bat = {}, bowl = {};
+    match.innings.forEach(inn=>{
+      Object.entries(inn.batsmen||{}).forEach(([name,b])=>{
+        if(!bat[name]) bat[name] = {name, runs:0, balls:0};
+        bat[name].runs += b.runs; bat[name].balls += b.balls;
+      });
+      Object.entries(inn.bowlers||{}).forEach(([name,b])=>{
+        if(!bowl[name]) bowl[name] = {name, wickets:0, runs:0, balls:0};
+        bowl[name].wickets += b.wickets; bowl[name].runs += b.runs; bowl[name].balls += b.balls;
+      });
+    });
+    const batList = Object.values(bat);
+    const bowlList = Object.values(bowl).map(b=>({...b, economy: b.balls>0 ? (b.runs/(b.balls/6)) : 0}));
+    if(batList.length===0 && bowlList.length===0) return null;
+
+    const bestBatter = batList.length ? [...batList].sort((a,b)=>b.runs-a.runs)[0] : null;
+    const bestBowler = bowlList.length ? [...bowlList].sort((a,b)=> b.wickets-a.wickets || a.economy-b.economy)[0] : null;
+
+    const impactMap = {};
+    batList.forEach(b=>{ impactMap[b.name] = (impactMap[b.name]||{name:b.name, runs:0, wickets:0}); impactMap[b.name].runs = b.runs; });
+    bowlList.forEach(b=>{ impactMap[b.name] = (impactMap[b.name]||{name:b.name, runs:0, wickets:0}); impactMap[b.name].wickets = b.wickets; });
+    const impactList = Object.values(impactMap).map(p=>({...p, impact: p.runs + p.wickets*20}));
+    const gameChanger = impactList.length ? [...impactList].sort((a,b)=>b.impact-a.impact)[0] : null;
+
+    return { bestBatter, bestBowler, gameChanger };
+  }
+
+  // ---- Players ----
+  function viewPlayers(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Players']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Career stats, aggregated automatically from every match scored.']));
+
+    if(isAdmin()){
+      const allNames = [...new Set(state.teams.flatMap(t=>t.players))].sort();
+      const roleCard = el('div',{class:'card'});
+      roleCard.appendChild(el('div',{class:'card-title'},['Set Player Roles']));
+      if(allNames.length===0){
+        roleCard.appendChild(el('div',{class:'empty'},['No players registered yet — add players when creating a match.']));
+      } else {
+        allNames.forEach(name=>{
+          const row = el('div',{style:'display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #EDE7D3; gap:10px;'});
+          row.appendChild(el('div',{style:'font-weight:700; font-size:13px;'},[name]));
+          const sel = el('select',{style:'max-width:170px;'});
+          ['Not Set','Batter','Bowler','All-rounder'].forEach(opt=>{
+            const o = el('option',{value:opt},[opt]);
+            if(getPlayerType(name)===opt) o.setAttribute('selected','selected');
+            sel.appendChild(o);
+          });
+          sel.addEventListener('change', ()=>{
+            if(sel.value==='Not Set') delete state.playerTypes[name];
+            else state.playerTypes[name] = sel.value;
+            persist();
+          });
+          row.appendChild(sel);
+          roleCard.appendChild(row);
+        });
+      }
+      wrap.appendChild(roleCard);
+    }
+
+    const stats = computePlayerStats();
+    const tabs = el('div',{class:'tabs'});
+    [['batting','Batting'],['bowling','Bowling']].forEach(([k,label])=>{
+      tabs.appendChild(el('button',{class: state.playersTab===k?'active':'', onClick:()=>{ state.playersTab=k; render(); }},[label]));
+    });
+    wrap.appendChild(tabs);
+
+    const card = el('div',{class:'card'});
+    if(stats.length===0){
+      card.appendChild(el('div',{class:'empty'},[
+        el('div',{class:'big'},['No player data yet']),
+        el('div',{},['Play a match to see stats here.'])
+      ]));
+    } else if(state.playersTab==='batting'){
+      const table = el('table',{});
+      const thead = el('tr',{});
+      ['Player','Role','M','Runs','Balls','Avg','SR','4s','6s'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      [...stats].sort((a,b)=>b.runs-a.runs).forEach(s=>{
+        const tr = el('tr',{});
+        [s.name, getPlayerType(s.name), s.matches, s.runs, s.balls, fmt1(s.average), fmt1(s.strikeRate), s.fours, s.sixes].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      card.appendChild(table);
+    } else {
+      const table = el('table',{});
+      const thead = el('tr',{});
+      ['Player','Role','M','Wkts','Overs','Runs','Econ'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      [...stats].sort((a,b)=>b.wickets-a.wickets).forEach(s=>{
+        const tr = el('tr',{});
+        [s.name, getPlayerType(s.name), s.matches, s.wickets, oversStr(s.ballsBowled), s.runsConceded, fmt1(s.economy)].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      card.appendChild(table);
+    }
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  // ---- Rankings ----
+  function viewRankings(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Rankings']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Best batters, best bowlers, and best all-rounders across every match.']));
+
+    const tabs = el('div',{class:'tabs'});
+    [['batters','Best Batters'],['bowlers','Best Bowlers'],['allrounders','Best All-Rounders']].forEach(([k,label])=>{
+      tabs.appendChild(el('button',{class: state.rankingsTab===k?'active':'', onClick:()=>{ state.rankingsTab=k; render(); }},[label]));
+    });
+    wrap.appendChild(tabs);
+
+    const stats = computePlayerStats();
+    const card = el('div',{class:'card'});
+
+    if(stats.length===0){
+      card.appendChild(el('div',{class:'empty'},[
+        el('div',{class:'big'},['No rankings yet']),
+        el('div',{},['Play some matches to populate rankings.'])
+      ]));
+      wrap.appendChild(card);
+      return wrap;
+    }
+
+    if(state.rankingsTab==='batters'){
+      card.appendChild(el('div',{class:'card-title'},['Best Batters — ranked by runs scored']));
+      const ranked = [...stats].filter(s=>s.runs>0).sort((a,b)=>b.runs-a.runs);
+      const table = el('table',{});
+      const thead = el('tr',{});
+      ['#','Player','Role','Runs','Avg','SR'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      ranked.forEach((s,i)=>{
+        const tr = el('tr',{});
+        const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(rankTd);
+        [s.name, getPlayerType(s.name), s.runs, fmt1(s.average), fmt1(s.strikeRate)].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      card.appendChild(table);
+    } else if(state.rankingsTab==='bowlers'){
+      card.appendChild(el('div',{class:'card-title'},['Best Bowlers — ranked by wickets taken']));
+      const ranked = [...stats].filter(s=>s.wickets>0 || s.ballsBowled>0).sort((a,b)=> b.wickets-a.wickets || a.economy-b.economy);
+      const table = el('table',{});
+      const thead = el('tr',{});
+      ['#','Player','Role','Wkts','Overs','Econ'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      ranked.forEach((s,i)=>{
+        const tr = el('tr',{});
+        const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(rankTd);
+        [s.name, getPlayerType(s.name), s.wickets, oversStr(s.ballsBowled), fmt1(s.economy)].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      card.appendChild(table);
+    } else {
+      card.appendChild(el('div',{class:'card-title'},['Best All-Rounders — players tagged All-rounder, ranked by combined impact']));
+      const ranked = [...stats]
+        .filter(s=>getPlayerType(s.name)==='All-rounder')
+        .map(s=>({...s, impact: s.runs + s.wickets*20}))
+        .sort((a,b)=>b.impact-a.impact);
+      if(ranked.length===0){
+        card.appendChild(el('div',{class:'empty'},['No players are tagged as All-rounder yet. An admin can set player roles on the Players page.']));
+      } else {
+        const table = el('table',{});
+        const thead = el('tr',{});
+        ['#','Player','Runs','Wkts','Impact'].forEach(h=>thead.appendChild(el('th',{},[h])));
+        table.appendChild(thead);
+        ranked.forEach((s,i)=>{
+          const tr = el('tr',{});
+          const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+          tr.appendChild(rankTd);
+          [s.name, s.runs, s.wickets, s.impact].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+          table.appendChild(tr);
+        });
+        card.appendChild(table);
+      }
+    }
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  // ---- Leaderboard ----
+  function viewLeaderboard(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Leaderboard']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Top performers across all matches.']));
+
+    const stats = computePlayerStats();
+    const row = el('div',{class:'row'});
+
+    const runsCard = el('div',{class:'card'},[]);
+    runsCard.appendChild(el('div',{class:'card-title'},['Most Runs']));
+    if(stats.length===0){ runsCard.appendChild(el('div',{class:'empty'},['No data yet.'])); }
+    else {
+      const table = el('table',{});
+      [...stats].sort((a,b)=>b.runs-a.runs).slice(0,5).forEach((s,i)=>{
+        const tr = el('tr',{});
+        const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(rankTd);
+        tr.appendChild(el('td',{style:'font-weight:700;'},[s.name]));
+        tr.appendChild(el('td',{class:'mono'},[String(s.runs)]));
+        table.appendChild(tr);
+      });
+      runsCard.appendChild(table);
+    }
+
+    const wktsCard = el('div',{class:'card'},[]);
+    wktsCard.appendChild(el('div',{class:'card-title'},['Most Wickets']));
+    if(stats.length===0){ wktsCard.appendChild(el('div',{class:'empty'},['No data yet.'])); }
+    else {
+      const table = el('table',{});
+      [...stats].sort((a,b)=>b.wickets-a.wickets).slice(0,5).forEach((s,i)=>{
+        const tr = el('tr',{});
+        const td0=el('td',{}); td0.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(td0);
+        tr.appendChild(el('td',{style:'font-weight:700;'},[s.name]));
+        tr.appendChild(el('td',{class:'mono'},[String(s.wickets)]));
+        table.appendChild(tr);
+      });
+      wktsCard.appendChild(table);
+    }
+
+    row.appendChild(runsCard);
+    row.appendChild(wktsCard);
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  // ---- Me / Profile ----
+  function viewProfile(){
+    const u = state.currentUser;
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Me']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Your account, playing details, and career stats.']));
+
+    // --- Account summary ---
+    const info = el('div',{class:'card'});
+    info.appendChild(el('div',{class:'card-title'},['Profile']));
+    [['Full name', u.fullName], ['Username', u.username], ['Email', u.email || '—'], ['Role', isAdmin()?'Admin':'User']].forEach(([label,val])=>{
+      info.appendChild(el('div',{style:'display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #EDE7D3; font-size:13px;'},[
+        el('div',{style:'color:#5A6459; font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.05em; align-self:center;'},[label]),
+        el('div',{style:'font-weight:700;'},[val])
+      ]));
+    });
+    wrap.appendChild(info);
+
+    // --- Player type + batting hand ---
+    const playCard = el('div',{class:'card'});
+    playCard.appendChild(el('div',{class:'card-title'},['My Playing Details']));
+
+    const roleRow = el('div',{style:'display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #EDE7D3; font-size:13px;'},[
+      el('div',{style:'color:#5A6459; font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.05em; align-self:center;'},['Player Type']),
+      el('div',{style:'font-weight:700;'},[getPlayerType(u.fullName)])
+    ]);
+    playCard.appendChild(roleRow);
+    if(getPlayerType(u.fullName)==='Not Set'){
+      playCard.appendChild(el('p',{class:'hint'},['An admin sets your batting/bowling type from the Players page, matched by your full name.']));
+    }
+
+    const handField = el('div',{class:'field', style:'margin-top:10px;'});
+    handField.appendChild(el('label',{},['Batting Hand']));
+    const handSel = el('select',{});
+    ['Not Set','Right-hand','Left-hand'].forEach(opt=>{
+      const o = el('option',{value:opt},[opt]);
+      if((u.battingHand||'Not Set')===opt) o.setAttribute('selected','selected');
+      handSel.appendChild(o);
+    });
+    handField.appendChild(handSel);
+    playCard.appendChild(handField);
+
+    const bowlField = el('div',{class:'field', style:'margin-top:10px;'});
+    bowlField.appendChild(el('label',{},['Bowling Style']));
+    const bowlSel = el('select',{});
+    ['Not Set','Right-arm Fast','Right-arm Medium','Right-arm Off-spin','Right-arm Leg-spin','Left-arm Fast','Left-arm Medium','Left-arm Orthodox Spin','Left-arm Chinaman','Does Not Bowl'].forEach(opt=>{
+      const o = el('option',{value:opt},[opt]);
+      if((u.bowlingStyle||'Not Set')===opt) o.setAttribute('selected','selected');
+      bowlSel.appendChild(o);
+    });
+    bowlField.appendChild(bowlSel);
+    playCard.appendChild(bowlField);
+
+    playCard.appendChild(el('button',{class:'btn btn-secondary btn-sm', onClick: async ()=>{
+      u.battingHand = handSel.value;
+      u.bowlingStyle = bowlSel.value;
+      await persistUsers();
+      render();
+    }},['Save Playing Details']));
+    wrap.appendChild(playCard);
+
+    // --- My stats ---
+    const stats = computePlayerStats();
+    const myStats = stats.find(s=>s.name.toLowerCase()===u.fullName.toLowerCase());
+    const statsCard = el('div',{class:'card'});
+    statsCard.appendChild(el('div',{class:'card-title'},['My Score & Wickets']));
+    if(!myStats){
+      statsCard.appendChild(el('div',{class:'empty'},['No match stats found yet for "'+u.fullName+'". Ask an admin to add you to a team using this exact name.']));
+    } else {
+      const statRow = el('div',{style:'display:flex; gap:24px; flex-wrap:wrap;'});
+      [['Matches',myStats.matches],['Runs',myStats.runs],['Avg',fmt1(myStats.average)],['SR',fmt1(myStats.strikeRate)],['Wickets',myStats.wickets],['Econ',fmt1(myStats.economy)]].forEach(([label,val])=>{
+        statRow.appendChild(el('div',{style:'min-width:80px;'},[
+          el('div',{class:'mono', style:'font-size:22px; font-weight:900; color:var(--field-green);'},[String(val)]),
+          el('div',{style:'font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:#8A8F7E; font-weight:700;'},[label])
+        ]));
+      });
+      statsCard.appendChild(statRow);
+    }
+    wrap.appendChild(statsCard);
+
+    // --- Change password ---
+    const pwCard = el('div',{class:'card'});
+    pwCard.appendChild(el('div',{class:'card-title'},['Change Password']));
+    const oldField = inputField('Old Password','password','current password');
+    const newField = inputField('New Password','password','new password (4+ characters)');
+    const confirmField = inputField('Confirm New Password','password','repeat new password');
+    pwCard.appendChild(oldField); pwCard.appendChild(newField); pwCard.appendChild(confirmField);
+    const pwMsg = el('div',{style:'font-size:12px; margin:4px 0 10px; display:none;'});
+    pwCard.appendChild(pwMsg);
+    pwCard.appendChild(el('button',{class:'btn btn-primary btn-sm', onClick: async ()=>{
+      const oldPw = oldField.querySelector('input').value;
+      const newPw = newField.querySelector('input').value;
+      const confirmPw = confirmField.querySelector('input').value;
+      pwMsg.style.display='block';
+      if(simpleHash(oldPw) !== u.passwordHash){
+        pwMsg.style.color='var(--ball-red)'; pwMsg.textContent='Old password is incorrect.'; return;
+      }
+      if(newPw.length<4){
+        pwMsg.style.color='var(--ball-red)'; pwMsg.textContent='New password must be at least 4 characters.'; return;
+      }
+      if(newPw !== confirmPw){
+        pwMsg.style.color='var(--ball-red)'; pwMsg.textContent='New passwords do not match.'; return;
+      }
+      u.passwordHash = simpleHash(newPw);
+      await persistUsers();
+      oldField.querySelector('input').value=''; newField.querySelector('input').value=''; confirmField.querySelector('input').value='';
+      pwMsg.style.color='var(--field-green)'; pwMsg.textContent='Password updated.';
+    }},['Update Password']));
+    wrap.appendChild(pwCard);
+
+    return wrap;
+  }
+
+  // ---- About ----
+  function viewAbout(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['About GGPL&YPL']));
+    wrap.appendChild(el('p',{class:'page-sub'},['A quick guide to what each part of the app does.']));
+
+    const sections = [
+      {
+        title:'Accounts & Roles',
+        body:'There are two roles: Admin, who can create matches, set player roles, and set up tournaments, and User (Viewer), who can create their own free account and then watch live scores and the points table. Note: this login is a lightweight, in-app gate for organizing who can do what — it is not secure authentication, so don\'t reuse a real/sensitive password here.'
+      },
+      {
+        title:'New Match',
+        body:'Admins set up a match by naming both teams, listing each team\'s players, choosing the overs per innings, and picking who bats first. This creates the two team rosters and opens straight into live scoring.'
+      },
+      {
+        title:'Live Scoring',
+        body:'Admins score every ball as it happens: tap a run value (0–6), mark extras (Wide, No Ball, Bye, Leg Bye), or record a Wicket. The app automatically rotates strike on odd runs and at the end of each over, tracks each batsman\'s and bowler\'s figures, and prompts the admin to pick a new batsman after a wicket or a new bowler at the start of every over. "Undo Last Ball" reverses the most recent ball if a mistake was made. Viewers see the same scoreboard in read-only mode, refreshing automatically every few seconds.'
+      },
+      {
+        title:'Innings & Match Result',
+        body:'An innings ends automatically once the overs run out or the batting side is all out. After the 1st innings, the app shows the target for the chase. During the 2nd innings, it displays the 1st innings score plus a live "runs needed / balls remaining / required run rate" line so everyone can follow the equation. Once both innings are done, the winner (or tie) is worked out automatically.'
+      },
+      {
+        title:'Players & Roles',
+        body:'Every player\'s career batting and bowling stats are calculated automatically from every match scored — no manual entry. An admin can also tag each player as a Batter, Bowler, or All-rounder from the Players page; that tag shows up everywhere the player appears, including Rankings.'
+      },
+      {
+        title:'Rankings',
+        body:'Three ranked boards: Best Batters (by runs scored), Best Bowlers (by wickets taken), and Best All-Rounders (players tagged All-rounder, ranked by a combined runs + wickets impact score).'
+      },
+      {
+        title:'Tournaments',
+        body:'Admins group a set of teams into a tournament, then tag new matches as part of it. The points table (2 points for a win, 1 for a tie) updates automatically as matches are completed, and is visible to everyone.'
+      },
+      {
+        title:'Leaderboard',
+        body:'A quick leaderboard of the top 5 run scorers and top 5 wicket takers across every match recorded in the app.'
+      },
+      {
+        title:'Saving Your Data',
+        body:'Everything — teams, matches, ball-by-ball history, tournaments, accounts — is saved automatically as you go, and is shared across everyone using this app, so admins and viewers always see the same live picture.'
+      }
+    ];
+
+    sections.forEach(s=>{
+      const card = el('div',{class:'card'});
+      card.appendChild(el('div',{class:'card-title'},[s.title]));
+      card.appendChild(el('p',{style:'margin:0; font-size:14px; line-height:1.55; color:#3B453B;'},[s.body]));
+      wrap.appendChild(card);
+    });
+
+    const credit = el('div',{class:'card', style:'text-align:center;'});
+    credit.appendChild(el('div',{class:'mono', style:'font-weight:800; letter-spacing:0.1em; text-transform:uppercase; font-size:12px; color:#8A8F7E;'},['GGPL&YPL']));
+    wrap.appendChild(credit);
+
+    return wrap;
+  }
+
+  // ---- Tournaments ----
+  function ensureDraftTournament(){
+    if(!state.draftTournament){
+      state.draftTournament = { name:'', location:'', overs:20, teams:[{name:'',players:''},{name:'',players:''}] };
+    }
+  }
+
+  function buildTourMatchPicker(tour){
+    const box = el('div',{style:'margin-top:12px; border-top:1px dashed #E4DEC9; padding-top:12px;'});
+    if(tour.teamIds.length<2){
+      box.appendChild(el('div',{class:'hint'},['This tournament needs at least 2 teams before you can schedule a match.']));
+      return box;
+    }
+    const teamAField = el('div',{class:'field'});
+    teamAField.appendChild(el('label',{},['Team A']));
+    const selA = el('select',{});
+    const teamBField = el('div',{class:'field'});
+    teamBField.appendChild(el('label',{},['Team B']));
+    const selB = el('select',{});
+    tour.teamIds.forEach(id=>{ const t=getTeam(id); if(t){ selA.appendChild(el('option',{value:id},[t.name])); selB.appendChild(el('option',{value:id},[t.name])); } });
+    if(tour.teamIds.length>1) selB.selectedIndex = 1;
+    teamAField.appendChild(selA); teamBField.appendChild(selB);
+
+    const oversField = inputField('Overs for this match','number','20');
+    oversField.querySelector('input').value = tour.overs || 20;
+
+    const matchNameField = inputField('Match name (optional)','text', getTeam(tour.teamIds[0]).name+' vs '+getTeam(tour.teamIds[1]).name);
+
+    const tossWinnerField = el('div',{class:'field'});
+    tossWinnerField.appendChild(el('label',{},['Toss won by']));
+    const tossWinnerSel = el('select',{});
+    tossWinnerSel.appendChild(el('option',{value:'a'},['Team A']));
+    tossWinnerSel.appendChild(el('option',{value:'b'},['Team B']));
+    tossWinnerField.appendChild(tossWinnerSel);
+
+    const tossDecisionField = el('div',{class:'field'});
+    tossDecisionField.appendChild(el('label',{},['Elected to']));
+    const tossDecisionSel = el('select',{});
+    tossDecisionSel.appendChild(el('option',{value:'bat'},['Bat']));
+    tossDecisionSel.appendChild(el('option',{value:'bowl'},['Bowl']));
+    tossDecisionField.appendChild(tossDecisionSel);
+
+    box.appendChild(matchNameField);
+    box.appendChild(el('div',{class:'row'},[teamAField, teamBField]));
+    box.appendChild(oversField);
+    box.appendChild(el('div',{class:'row'},[tossWinnerField, tossDecisionField]));
+
+    const err = el('div',{style:'color:var(--ball-red); font-size:12px; margin:6px 0; display:none;'});
+    box.appendChild(err);
+
+    const btnRow = el('div',{style:'display:flex; gap:8px;'});
+    btnRow.appendChild(el('button',{class:'btn btn-primary btn-sm', onClick:()=>{
+      if(selA.value === selB.value){
+        err.textContent = 'Pick two different teams.'; err.style.display='block'; return;
+      }
+      const totalOvers = parseInt(oversField.querySelector('input').value) || (tour.overs||20);
+      const mName = matchNameField.querySelector('input').value.trim() || (getTeam(selA.value).name+' vs '+getTeam(selB.value).name);
+      const tossWinnerId = tossWinnerSel.value==='a' ? selA.value : selB.value;
+      const tossLoserId = tossWinnerSel.value==='a' ? selB.value : selA.value;
+      const decision = tossDecisionSel.value;
+      const battingId = decision==='bat' ? tossWinnerId : tossLoserId;
+      const bowlingId = decision==='bat' ? tossLoserId : tossWinnerId;
+      const match = {
+        id: uid(), name: mName, team1Id: selA.value, team2Id: selB.value,
+        totalOvers, status:'live', tournamentId: tour.id, location: tour.location || '',
+        toss: { winnerName: getTeam(tossWinnerId).name, decision },
+        innings: [ newInnings(battingId, bowlingId) ],
+        result: null
+      };
+      state.matches.push(match);
+      state.showAddTourMatch = false;
+      persist();
+      setView('scoring', {activeMatchId: match.id});
+    }},['Start Match']));
+    btnRow.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>{ state.showAddTourMatch=false; render(); }},['Cancel']));
+    box.appendChild(btnRow);
+    return box;
+  }
+
+  function viewTournaments(){
+    const wrap = el('div',{});
+    wrap.appendChild(el('h1',{class:'page-title display-font'},['Tournaments']));
+    wrap.appendChild(el('p',{class:'page-sub'},['Group matches into a league and track the points table.']));
+
+    if(!state.activeTournamentId){
+      if(isAdmin()){
+        ensureDraftTournament();
+        const draft = state.draftTournament;
+        const newCard = el('div',{class:'card'});
+        newCard.appendChild(el('div',{class:'card-title'},['Create Tournament']));
+
+        const nameField = inputField('Tournament name','text','e.g. Weekend Premier League');
+        nameField.querySelector('input').value = draft.name;
+        nameField.querySelector('input').addEventListener('input', e=>{ draft.name = e.target.value; });
+        newCard.appendChild(nameField);
+
+        const locationField = inputField('Location / Venue','text','e.g. MPP School Ground');
+        locationField.querySelector('input').value = draft.location;
+        locationField.querySelector('input').addEventListener('input', e=>{ draft.location = e.target.value; });
+        newCard.appendChild(locationField);
+
+        const oversField = inputField('Overs per match', 'number', '20');
+        oversField.querySelector('input').value = draft.overs;
+        oversField.querySelector('input').addEventListener('input', e=>{ draft.overs = parseInt(e.target.value)||20; });
+        newCard.appendChild(oversField);
+
+        newCard.appendChild(el('div',{style:'font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#5A6459; margin:14px 0 6px;'},['Teams in this Tournament']));
+
+        draft.teams.forEach((t,i)=>{
+          const teamBlock = el('div',{style:'border:1px solid #E4DEC9; border-radius:5px; padding:10px 12px; margin-bottom:10px;'});
+          const teamHead = el('div',{style:'display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;'},[
+            el('div',{style:'font-weight:800; font-size:12px; text-transform:uppercase; color:var(--field-green);'},['Team '+(i+1)])
+          ]);
+          if(draft.teams.length>2){
+            teamHead.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>{ draft.teams.splice(i,1); render(); }},['Remove']));
+          }
+          teamBlock.appendChild(teamHead);
+          const nField = inputField('Team name','text','e.g. Warriors');
+          nField.querySelector('input').value = t.name;
+          nField.querySelector('input').addEventListener('input', e=>{ t.name = e.target.value; });
+          const pField = inputField('Players (comma separated)','text','Aarav, Vikram, Rohan, ...');
+          pField.querySelector('input').value = t.players;
+          pField.querySelector('input').addEventListener('input', e=>{ t.players = e.target.value; });
+          teamBlock.appendChild(nField);
+          teamBlock.appendChild(pField);
+          newCard.appendChild(teamBlock);
+        });
+
+        newCard.appendChild(el('button',{class:'btn btn-outline btn-sm', style:'margin-bottom:14px;', onClick:()=>{
+          draft.teams.push({name:'',players:''});
+          render();
+        }},['+ Add Another Team']));
+
+        const err = el('div',{style:'color:var(--ball-red); font-size:12px; margin-bottom:10px; display:none;'});
+        newCard.appendChild(err);
+
+        const btnRow = el('div',{style:'display:flex; gap:10px;'});
+        btnRow.appendChild(el('button',{class:'btn btn-primary', onClick:()=>{
+          const name = draft.name.trim() || 'Untitled Tournament';
+          const location = draft.location.trim();
+          const overs = draft.overs || 20;
+          const validTeams = draft.teams.filter(t=>t.name.trim() && t.players.split(',').map(s=>s.trim()).filter(Boolean).length>=2);
+          if(validTeams.length<2){
+            err.textContent = 'Add at least 2 teams, each with a name and 2+ players.';
+            err.style.display='block';
+            return;
+          }
+          const newTeams = validTeams.map(t=>({id:uid(), name:t.name.trim(), players:t.players.split(',').map(s=>s.trim()).filter(Boolean)}));
+          state.teams.push(...newTeams);
+          const tour = {id:uid(), name, location, overs, teamIds:newTeams.map(t=>t.id)};
+          state.tournaments.push(tour);
+          state.draftTournament = null;
+          persist();
+          setView('tournaments', {activeTournamentId: tour.id});
+        }},['Create Tournament']));
+        if(draft.name || draft.location || draft.teams.some(t=>t.name||t.players)){
+          btnRow.appendChild(el('button',{class:'btn btn-outline', onClick:()=>{
+            state.draftTournament = null;
+            render();
+          }},['Clear Form']));
+        }
+        newCard.appendChild(btnRow);
+        wrap.appendChild(newCard);
+      }
+
+      const listCard = el('div',{class:'card'});
+      listCard.appendChild(el('div',{class:'card-title'},['Existing Tournaments']));
+      if(state.tournaments.length===0){
+        listCard.appendChild(el('div',{class:'empty'},['No tournaments yet.']));
+      } else {
+        state.tournaments.forEach(t=>{
+          const card = el('div',{class:'match-card', onClick:()=>setView('tournaments',{activeTournamentId:t.id})},[
+            el('div',{},[
+              el('div',{class:'match-name'},[t.name]),
+              el('div',{class:'match-meta'},[t.teamIds.length+' teams · '+(t.overs||20)+' overs a match'+(t.location? ' · 📍 '+t.location : '')])
+            ]),
+            el('div',{class:'status-pill completed'},['View'])
+          ]);
+          listCard.appendChild(card);
+        });
+      }
+      wrap.appendChild(listCard);
+      return wrap;
+    }
+
+    // Tournament detail
+    const tour = state.tournaments.find(t=>t.id===state.activeTournamentId);
+    if(!tour){ setView('tournaments',{activeTournamentId:null}); return el('div',{}); }
+    wrap.appendChild(el('button',{class:'btn btn-outline btn-sm', onClick:()=>setView('tournaments',{activeTournamentId:null, showAddTourMatch:false})},['← All Tournaments']));
+
+    const header = el('div',{class:'card', style:'margin-top:14px;'});
+    header.appendChild(el('div',{class:'card-title'},[tour.name]));
+    if(tour.location){
+      header.appendChild(el('p',{style:'margin:-6px 0 4px; font-weight:700; color:var(--field-green); font-size:13px;'},['📍 '+tour.location]));
+    }
+    header.appendChild(el('p',{class:'hint', style:'margin:-6px 0 10px;'},['Teams: '+tour.teamIds.map(id=>{const t=getTeam(id); return t?t.name:'?';}).join(', ')]));
+    if(isAdmin()){
+      if(!state.showAddTourMatch){
+        header.appendChild(el('button',{class:'btn btn-secondary btn-sm', onClick:()=>{ state.showAddTourMatch = true; render(); }},['+ Add Match to Tournament']));
+      } else {
+        header.appendChild(buildTourMatchPicker(tour));
+      }
+    }
+    wrap.appendChild(header);
+
+    // points table
+    const tourMatches = state.matches.filter(m=>m.tournamentId===tour.id);
+    const pts = {};
+    tour.teamIds.forEach(id=>{ const t=getTeam(id); if(t) pts[id] = {name:t.name, played:0, won:0, lost:0, tied:0, points:0}; });
+    tourMatches.forEach(m=>{
+      if(m.status!=='completed') return;
+      const inn1=m.innings[0], inn2=m.innings[1];
+      if(!inn2) return;
+      const id1 = inn1.battingTeamId, id2 = inn2.battingTeamId;
+      if(pts[id1]) pts[id1].played++;
+      if(pts[id2]) pts[id2].played++;
+      if(inn1.runs===inn2.runs){
+        if(pts[id1]){pts[id1].tied++; pts[id1].points+=1;}
+        if(pts[id2]){pts[id2].tied++; pts[id2].points+=1;}
+      } else {
+        const winner = inn2.runs>inn1.runs ? id2 : id1;
+        const loser = winner===id1 ? id2 : id1;
+        if(pts[winner]){pts[winner].won++; pts[winner].points+=2;}
+        if(pts[loser]){pts[loser].lost++;}
+      }
+    });
+
+    const ptsCard = el('div',{class:'card'});
+    ptsCard.appendChild(el('div',{class:'card-title'},['Points Table']));
+    if(Object.keys(pts).length===0){
+      ptsCard.appendChild(el('div',{class:'empty'},['No teams added.']));
+    } else {
+      const table = el('table',{class:'points-table'});
+      const thead = el('tr',{});
+      ['Team','P','W','L','T','Pts'].forEach(h=>thead.appendChild(el('th',{},[h])));
+      table.appendChild(thead);
+      Object.values(pts).sort((a,b)=>b.points-a.points).forEach(row=>{
+        const tr = el('tr',{});
+        [row.name,row.played,row.won,row.lost,row.tied,row.points].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        table.appendChild(tr);
+      });
+      ptsCard.appendChild(table);
+    }
+    wrap.appendChild(ptsCard);
+
+    // Tournament-scoped Top 10 run scorers / wicket takers — updates live as matches are scored,
+    // visible to admins and viewers alike.
+    const tourStats = computePlayerStats(tourMatches);
+    const rankRow = el('div',{class:'row'});
+
+    const runsCard = el('div',{class:'card'});
+    runsCard.appendChild(el('div',{class:'card-title'},['Top 10 Run Scorers']));
+    const topRuns = [...tourStats].filter(s=>s.runs>0).sort((a,b)=>b.runs-a.runs).slice(0,10);
+    if(topRuns.length===0){
+      runsCard.appendChild(el('div',{class:'empty'},['No runs scored in this tournament yet.']));
+    } else {
+      const t = el('table',{});
+      const th = el('tr',{});
+      ['#','Player','Role','Runs','Avg','SR'].forEach(h=>th.appendChild(el('th',{},[h])));
+      t.appendChild(th);
+      topRuns.forEach((s,i)=>{
+        const tr = el('tr',{});
+        const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(rankTd);
+        [s.name, getPlayerType(s.name), s.runs, fmt1(s.average), fmt1(s.strikeRate)].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        t.appendChild(tr);
+      });
+      runsCard.appendChild(t);
+    }
+    rankRow.appendChild(runsCard);
+
+    const wktsCard = el('div',{class:'card'});
+    wktsCard.appendChild(el('div',{class:'card-title'},['Top 10 Wicket Takers']));
+    const topWkts = [...tourStats].filter(s=>s.wickets>0 || s.ballsBowled>0).sort((a,b)=> b.wickets-a.wickets || a.economy-b.economy).slice(0,10);
+    if(topWkts.length===0){
+      wktsCard.appendChild(el('div',{class:'empty'},['No wickets taken in this tournament yet.']));
+    } else {
+      const t = el('table',{});
+      const th = el('tr',{});
+      ['#','Player','Role','Wkts','Overs','Econ'].forEach(h=>th.appendChild(el('th',{},[h])));
+      t.appendChild(th);
+      topWkts.forEach((s,i)=>{
+        const tr = el('tr',{});
+        const rankTd = el('td',{}); rankTd.appendChild(el('span',{class:'rank-badge'},[String(i+1)]));
+        tr.appendChild(rankTd);
+        [s.name, getPlayerType(s.name), s.wickets, oversStr(s.ballsBowled), fmt1(s.economy)].forEach(v=>tr.appendChild(el('td',{},[String(v)])));
+        t.appendChild(tr);
+      });
+      wktsCard.appendChild(t);
+    }
+    rankRow.appendChild(wktsCard);
+
+    wrap.appendChild(rankRow);
+
+    const matchesCard = el('div',{class:'card'});
+    matchesCard.appendChild(el('div',{class:'card-title'},['Matches']));
+    if(tourMatches.length===0){
+      matchesCard.appendChild(el('div',{class:'empty'},['No matches added yet.']));
+    } else {
+      tourMatches.forEach(m=>{
+        matchesCard.appendChild(buildMatchCard(m));
+      });
+    }
+    wrap.appendChild(matchesCard);
+
+    return wrap;
+  }
+
+  load();
+})();
+</script>
